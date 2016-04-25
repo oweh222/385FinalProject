@@ -1,29 +1,27 @@
 module sramIOHandler
 (
 		input Clk, Reset,
-		input[9:0] drawxsig, drawysig, 	
 		output    SRAM_CE_N,
                 SRAM_UB_N,
                 SRAM_LB_N,
                 SRAM_OE_N,
-                SRAM_WE_N,
-		output logic [19:0]			 SRAM_ADDR
+                SRAM_WE_N
+		//output logic [19:0]			 SRAM_ADDR
 );
 
-
-	enum logic[1:0] {init, enable, read} state, next_state;
+	enum logic[1:0] {init, enable} state, next_state;
 	
 	always_ff @ (posedge Clk or  posedge Reset)
 	begin
 		if (Reset)
 		begin
 			state <= init;
-			SRAM_ADDR <= 20'd0;
+			//SRAM_ADDR <= 20'd0;
 	   end
 		else 
 		begin
 			state <= next_state;
-			SRAM_ADDR <= drawxsig % 32 * 32 + drawysig % 32;
+			//SRAM_ADDR <= drawxsig % 32 * 32 + drawysig % 32;
 		end
 		
 	end
@@ -45,15 +43,12 @@ module sramIOHandler
 			
 			enable: begin
 				SRAM_OE_N = 1'b0;
-				next_state = read;
+				next_state = init;
 			end 
 			
-			read: begin
-				SRAM_OE_N = 1'b0;
-				next_state = init;
-			end
 		endcase		
 			
 	end 
+
 	
 endmodule 
