@@ -22,6 +22,7 @@
 //-------------------------------------------------------------------------
 
 
+
 module  vga_controller ( input        Clk,       // 50 MHz clock
                                       Reset,     // reset signal
                          output logic hs,        // Horizontal sync pulse.  Active low

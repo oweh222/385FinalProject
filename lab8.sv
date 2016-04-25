@@ -42,12 +42,18 @@ module  lab8 		( input         CLOCK_50,
 							  output			 DRAM_CKE,				// SDRAM Clock Enable
 							  output			 DRAM_WE_N,				// SDRAM Write Enable
 							  output			 DRAM_CS_N,				// SDRAM Chip Select
-							  output			 DRAM_CLK				// SDRAM Clock
+							  output			 DRAM_CLK,				// SDRAM Clock
+							  // PS2 interface
+							  input 			 PS2_CLK, PS2_DAT
+
 											);
     
-    logic Reset_h, vssig, Clk;
+    logic Reset_h, vssig, Clk, press;
     logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig;
 	 logic [15:0] keycode;
+	 
+	 logic [15:0] color;
+	 
     
 	 assign Clk = CLOCK_50;
     assign {Reset_h}=~ (KEY[0]);  // The push buttons are active low
@@ -56,6 +62,15 @@ module  lab8 		( input         CLOCK_50,
 	 wire [1:0] hpi_addr;
 	 wire [15:0] hpi_data_in, hpi_data_out;
 	 wire hpi_r, hpi_w,hpi_cs;
+	 
+	 
+	 assign	VGA_R = {color[15:11], 3'b011};
+	 assign	VGA_G = {color[10:6], 3'b011};
+	 assign	VGA_B = {color[5:1], 3'b011};
+	
+
+	 
+
 	 
 	 hpi_io_intf hpi_io_inst(   .from_sw_address(hpi_addr),
 										 .from_sw_data_in(hpi_data_in),
@@ -75,7 +90,7 @@ module  lab8 		( input         CLOCK_50,
 	 );
 	 
 	 //The connections for nios_system might be named different depending on how you set up Qsys
-	 lab8_soc lab8_soc_(
+	 /*lab8_soc lab8_soc_(
 										 .clk_clk(Clk),         
 										 .reset_reset_n(KEY[0]),   
 										 .sdram_wire_addr(DRAM_ADDR), 
@@ -95,7 +110,7 @@ module  lab8 		( input         CLOCK_50,
 										 .otg_hpi_cs_export(hpi_cs),
 										 .otg_hpi_r_export(hpi_r),
 										 .otg_hpi_w_export(hpi_w)
-	);
+	);*/
 	
 	//Fill in the connections for the rest of the modules 
     vga_controller vgasync_instance
@@ -109,7 +124,8 @@ module  lab8 		( input         CLOCK_50,
 		.DrawX(drawxsig),
 		.DrawY(drawysig)
 	 );
-   
+    
+
     ball ball_instance
 	 (
 		.OTG_DATA(keycode),
@@ -119,22 +135,38 @@ module  lab8 		( input         CLOCK_50,
 		.BallY(ballysig), 
 		.BallS(ballsizesig)
 	 );
-   
+    
+	 
+	 
     color_mapper color_instance
 	 (
+		.*,
+		.color(color),
 		.BallX(ballxsig), 
 		.BallY(ballysig), 
 		.DrawX(drawxsig), 
 		.DrawY(drawysig), 
 		.Ball_size(ballsizesig),
-		.Red(VGA_R), 
-		.Green(VGA_G), 
-		.Blue(VGA_B)
+
+	 );
+	 
+	 keyboard keyboard_inst
+	 (
+		.Clk(Clk),
+		.psClk(PS2_CLK),
+		.psData(PS2_DAT),
+		.reset(Reset_h),
+		.keyCode(keycode),
+		.press(press)
+		
 	 );
 										  
 	 HexDriver hex_inst_0 (keycode[3:0], HEX0);
 	 HexDriver hex_inst_1 (keycode[7:4], HEX1);
     
+	 
+	
+	  
 
 	 /**************************************************************************************
 	    ATTENTION! Please answer the following quesiton in your lab report! Points will be allocated for the answers!
