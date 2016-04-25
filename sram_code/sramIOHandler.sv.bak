@@ -1,0 +1,24 @@
+/**
+ * Created By Sihao Chen
+ *
+ * A sram IO contoller
+ * A state machine that reads Sprite Data from the sram
+ * Use along with Tri-state Buffer in lab 6
+ *
+ */
+
+
+module sramIOHandler(	input Clk, Reset,
+						input [19:0]  A,
+						input [9:0] DrawX, DrawY, 
+						output CE, UB, LB, OE, WE,
+					 );
+
+	enum logic [3:0] {Reset, In_Screen, Notch} State, Next_State;
+
+    assign OE = (DrawX < 640 && DrawY < 600) ? 1'b0 : 1'b1;
+
+    assign WE = 1'b1;
+	assign CE = 1'b0;
+	assign UB = 1'b0;
+	assign LB = 1'b0;
